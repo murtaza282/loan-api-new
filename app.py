@@ -11,6 +11,7 @@ import joblib
 import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
+from fastapi.middleware.cors import CORSMiddleware
 
 # ---------------------------------------------------------------------------
 # 1. Load the trained model ONCE, when the service starts up.
@@ -31,6 +32,12 @@ app = FastAPI(
     version="1.0",
 )
 
+app.add_middleware(
+CORSMiddleware,
+allow_origins=["*"],
+allow_methods=["*"],
+allow_headers=["*"],
+)
 
 # ---------------------------------------------------------------------------
 # 3. Define the SHAPE of the incoming data.

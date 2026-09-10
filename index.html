@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Loan Default Checker</title>
+</head>
+<body>
+<h1>Loan Default Checker</h1>
+<form id="loanForm">
+<label>Age</label><br>
+<input type="number" id="age" value="29"><br>
+<label>Annual Income</label><br>
+<input type="number" id="annual_income" value="52000"><br>
+<label>Years Employed</label><br>
+<input type="number" step="0.1" id="years_employed" value="3.0"><br>
+<label>Credit Score</label><br>
+<input type="number" id="credit_score" value="610"><br>
+<label>Loan Amount</label><br>
+<input type="number" id="loan_amount" value="48000"><br>
+<label>Loan Term (months)</label><br>
+<input type="number" id="loan_term_months" value="60"><br>
+<label>Number of Credit Cards</label><br>
+<input type="number" id="num_credit_cards" value="5"><br>
+<label>Debt-to-Income Ratio</label><br>
+<input type="number" step="0.01" id="debt_to_income" value="0.923"><br>
+<button type="submit">Check Application</button>
+</form>
+<p id="result"></p>
+<script>
+// ---------------------------------------------------------------------
+// THIS LINE POINTS AT OUR API. While testing locally, it's our own
+// machine. After Cloud Run deployment, this becomes the live URL.
+// ---------------------------------------------------------------------
+const API_URL = "https://loan-api-867844791345.us-central1.run.app/predict";
+const form = document.getElementById("loanForm");
+const resultBox = document.getElementById("result");
+form.addEventListener("submit", async function (event) {
+event.preventDefault(); // stop the page from reloading on submit
+// Collect every input field into one object matching the API's
+// expected field names exactly.
+const applicant = {
+age: parseInt(document.getElementById("age").value),
+annual_income: parseFloat(document.getElementById("annual_income").value),
+years_employed: parseFloat(document.getElementById("years_employed").value),
+credit_score: parseInt(document.getElementById("credit_score").value),
+loan_amount: parseFloat(document.getElementById("loan_amount").value),
+loan_term_months: parseInt(document.getElementById("loan_term_months").value),
+num_credit_cards: parseInt(document.getElementById("num_credit_cards").value),
+debt_to_income: parseFloat(document.getElementById("debt_to_income").value),
+};
+resultBox.textContent = "Checking...";
+const response = await fetch(API_URL, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify(applicant),
+});
+const data = await response.json();
+const pct = (data.default_probability * 100).toFixed(1);
+resultBox.textContent = data.decision + " — default probability " + pct + "%";
+});
+</script>
+</body>
+</html>
