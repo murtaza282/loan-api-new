@@ -1,62 +1,575 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Loan Default Checker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loan Decisioning — Risk Assessment</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F2A3F;
+    --navy-soft: #17364C;
+    --navy-line: #2A4A61;
+    --paper: #F6F4EF;
+    --paper-panel: #FFFFFF;
+    --brass: #A67C3D;
+    --brass-soft: #C79A54;
+    --approve-bg: #EAF2ED;
+    --approve-ink: #1F5B3F;
+    --decline-bg: #F5EAE8;
+    --decline-ink: #7A342E;
+    --line: #DFDACD;
+    --ink: #1B2833;
+    --ink-soft: #5B6773;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  .shell {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .work {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ---------- LEFT: letterhead panel ---------- */
+  .letterhead {
+    width: 340px;
+    flex-shrink: 0;
+    background: var(--navy);
+    color: #EDEFF1;
+    padding: 56px 40px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .mark {
+    width: 40px;
+    height: 40px;
+    border: 1.5px solid var(--brass-soft);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-size: 18px;
+    color: var(--brass-soft);
+    margin-bottom: 32px;
+    flex-shrink: 0;
+  }
+
+  .letterhead h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.25;
+    margin: 0 0 14px;
+    color: #FFFFFF;
+    letter-spacing: -0.01em;
+  }
+
+  .letterhead .lede {
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: #B9C3CB;
+    margin: 0 0 auto;
+    max-width: 30ch;
+  }
+
+  .letterhead .divider {
+    height: 1px;
+    background: var(--navy-line);
+    margin: 32px 0 24px;
+  }
+
+  .signal-key {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .signal-key .row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 12.5px;
+    color: #97A4AE;
+  }
+
+  .signal-key .swatch {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .letterhead .foot {
+    margin-top: 40px;
+    font-size: 12px;
+    color: #6E7C87;
+    line-height: 1.6;
+  }
+
+  /* ---------- RIGHT: the form ---------- */
+  .work {
+    padding: 56px 64px 64px;
+    max-width: 760px;
+  }
+
+  .work-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+    gap: 24px;
+  }
+
+  .work-head h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 22px;
+    margin: 0;
+    color: var(--navy);
+  }
+
+  .ref {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .work-sub {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0 0 36px;
+    line-height: 1.6;
+  }
+
+  fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 0 36px;
+  }
+
+  legend {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brass);
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--line);
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .grid {
+    display: table;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 22px;
+  }
+
+  .grid-row {
+    display: table-row;
+  }
+
+  .field {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    padding-right: 24px;
+  }
+
+  .field:last-child { padding-right: 0; }
+  .field.span-2 { display: block; width: auto; padding-right: 0; }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 7px;
+  }
+
+  .field .hint {
+    display: block;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin-top: 5px;
+    min-height: 15px;
+  }
+
+  .field input,
+  .field select {
+    display: block;
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 14.5px;
+    color: var(--ink);
+    background: var(--paper-panel);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--brass);
+    box-shadow: 0 0 0 3px rgba(166, 124, 61, 0.14);
+  }
+
+  .field input::-webkit-outer-spin-button,
+  .field input::-webkit-inner-spin-button {
+    opacity: 0.4;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+
+  button.submit {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 14.5px;
+    color: #FFFFFF;
+    background: var(--navy);
+    border: none;
+    border-radius: 3px;
+    padding: 13px 26px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  button.submit:hover { background: #143349; }
+  button.submit:disabled { background: #9AA6AE; cursor: default; }
+
+  .actions .note {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Result panel ---------- */
+  .result {
+    margin-top: 32px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .result.show { display: block; }
+
+  .result-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 26px;
+  }
+
+  .result.approve .result-head { background: var(--approve-bg); }
+  .result.decline .result-head { background: var(--decline-bg); }
+
+  .result-verdict {
+    font-family: var(--serif);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .result.approve .result-verdict { color: var(--approve-ink); }
+  .result.decline .result-verdict { color: var(--decline-ink); }
+
+  .result-prob {
+    text-align: right;
+  }
+
+  .result-prob .num {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .result.approve .result-prob .num { color: var(--approve-ink); }
+  .result.decline .result-prob .num { color: var(--decline-ink); }
+
+  .result-prob .cap {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .result-body {
+    background: var(--paper-panel);
+    padding: 18px 26px 22px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    border-top: 1px solid var(--line);
+  }
+
+  .result-body strong { color: var(--ink); }
+
+  .error-banner {
+    margin-top: 32px;
+    background: var(--decline-bg);
+    border: 1px solid #DCC2BE;
+    border-radius: 4px;
+    padding: 16px 22px;
+    font-size: 13.5px;
+    color: var(--decline-ink);
+    display: none;
+  }
+
+  .error-banner.show { display: block; }
+
+  .spin {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: -2px;
+    margin-right: 8px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 880px) {
+    .shell { flex-direction: column; }
+    .letterhead { width: auto; padding: 36px 28px; }
+    .letterhead .lede { max-width: none; }
+    .work { padding: 40px 28px 56px; max-width: none; }
+    .grid-row { display: block; }
+    .field { display: block; width: auto; padding-right: 0; margin-bottom: 18px; }
+  }
+</style>
 </head>
 <body>
-<h1>Loan Default Checker</h1>
-<form id="loanForm">
-<label>Age</label><br>
-<input type="number" id="age" value="29"><br>
-<label>Annual Income</label><br>
-<input type="number" id="annual_income" value="52000"><br>
-<label>Years Employed</label><br>
-<input type="number" step="0.1" id="years_employed" value="3.0"><br>
-<label>Credit Score</label><br>
-<input type="number" id="credit_score" value="610"><br>
-<label>Loan Amount</label><br>
-<input type="number" id="loan_amount" value="48000"><br>
-<label>Loan Term (months)</label><br>
-<input type="number" id="loan_term_months" value="60"><br>
-<label>Number of Credit Cards</label><br>
-<input type="number" id="num_credit_cards" value="5"><br>
-<label>Debt-to-Income Ratio</label><br>
-<input type="number" step="0.01" id="debt_to_income" value="0.923"><br>
-<button type="submit">Check Application</button>
-</form>
-<p id="result"></p>
+
+<div class="shell">
+
+  <!-- LEFT: letterhead -->
+  <aside class="letterhead">
+    <div class="mark">L</div>
+    <h1>Loan Decisioning<br>Risk Assessment</h1>
+    <p class="lede">A model trained on historical repayment outcomes estimates the likelihood that an applicant defaults, based on eight financial factors.</p>
+
+    <div class="divider"></div>
+
+    <div class="signal-key">
+      <div class="row"><span class="swatch" style="background:#2E6B4F"></span> Below 50% — recommend approval</div>
+      <div class="row"><span class="swatch" style="background:#8B3A3A"></span> 50% and above — recommend decline</div>
+    </div>
+
+    <p class="foot">Model: logistic regression, trained on 800 historical applications. For demonstration purposes.</p>
+  </aside>
+
+  <!-- RIGHT: the form -->
+  <main class="work">
+    <div class="work-head">
+      <h2>New application</h2>
+      <span class="ref" id="ref"></span>
+    </div>
+    <p class="work-sub">Enter the applicant's details below. All fields are required.</p>
+
+    <form id="loanForm">
+
+      <fieldset>
+        <legend>Applicant</legend>
+        <div class="grid">
+          <div class="grid-row">
+            <div class="field">
+              <label for="age">Age</label>
+              <input type="number" id="age" value="29" min="18" max="100" required>
+              <span class="hint">&nbsp;</span>
+            </div>
+            <div class="field">
+              <label for="years_employed">Years employed</label>
+              <input type="number" id="years_employed" value="3.0" step="0.1" min="0" required>
+              <span class="hint">&nbsp;</span>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Financial standing</legend>
+        <div class="grid">
+          <div class="grid-row">
+            <div class="field">
+              <label for="annual_income">Annual income</label>
+              <input type="number" id="annual_income" value="52000" min="0" required>
+              <span class="hint">In your local currency, before tax</span>
+            </div>
+            <div class="field">
+              <label for="credit_score">Credit score</label>
+              <input type="number" id="credit_score" value="610" min="300" max="850" required>
+              <span class="hint">&nbsp;</span>
+            </div>
+          </div>
+          <div class="grid-row">
+            <div class="field">
+              <label for="num_credit_cards">Number of credit cards</label>
+              <input type="number" id="num_credit_cards" value="5" min="0" max="20" required>
+              <span class="hint">&nbsp;</span>
+            </div>
+            <div class="field">
+              <label for="debt_to_income">Debt-to-income ratio</label>
+              <input type="number" id="debt_to_income" value="0.923" step="0.01" min="0" max="5" required>
+              <span class="hint">Total monthly debt ÷ monthly income</span>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Requested loan</legend>
+        <div class="grid">
+          <div class="grid-row">
+            <div class="field">
+              <label for="loan_amount">Loan amount</label>
+              <input type="number" id="loan_amount" value="48000" min="0" required>
+              <span class="hint">&nbsp;</span>
+            </div>
+            <div class="field">
+              <label for="loan_term_months">Term</label>
+              <select id="loan_term_months" required>
+                <option value="12">12 months</option>
+                <option value="24">24 months</option>
+                <option value="36">36 months</option>
+                <option value="48">48 months</option>
+                <option value="60" selected>60 months</option>
+              </select>
+              <span class="hint">&nbsp;</span>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" class="submit" id="submitBtn">Assess application</button>
+        <span class="note">Runs the model and returns a decision instantly.</span>
+      </div>
+    </form>
+
+    <div class="result" id="result">
+      <div class="result-head">
+        <span class="result-verdict" id="verdict"></span>
+        <div class="result-prob">
+          <div class="num" id="probNum"></div>
+          <div class="cap">default probability</div>
+        </div>
+      </div>
+      <div class="result-body" id="resultBody"></div>
+    </div>
+
+    <div class="error-banner" id="errorBanner"></div>
+
+  </main>
+</div>
+
 <script>
-// ---------------------------------------------------------------------
-// THIS LINE POINTS AT OUR API. While testing locally, it's our own
-// machine. After Cloud Run deployment, this becomes the live URL.
-// ---------------------------------------------------------------------
-const API_URL = "https://loan-api-867844791345.us-central1.run.app/predict";
-const form = document.getElementById("loanForm");
-const resultBox = document.getElementById("result");
-form.addEventListener("submit", async function (event) {
-event.preventDefault(); // stop the page from reloading on submit
-// Collect every input field into one object matching the API's
-// expected field names exactly.
-const applicant = {
-age: parseInt(document.getElementById("age").value),
-annual_income: parseFloat(document.getElementById("annual_income").value),
-years_employed: parseFloat(document.getElementById("years_employed").value),
-credit_score: parseInt(document.getElementById("credit_score").value),
-loan_amount: parseFloat(document.getElementById("loan_amount").value),
-loan_term_months: parseInt(document.getElementById("loan_term_months").value),
-num_credit_cards: parseInt(document.getElementById("num_credit_cards").value),
-debt_to_income: parseFloat(document.getElementById("debt_to_income").value),
-};
-resultBox.textContent = "Checking...";
-const response = await fetch(API_URL, {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify(applicant),
-});
-const data = await response.json();
-const pct = (data.default_probability * 100).toFixed(1);
-resultBox.textContent = data.decision + " — default probability " + pct + "%";
-});
+  // -------------------------------------------------------------------
+  // THE ONE LINE TO CHANGE FOR DEPLOYMENT
+  // Empty string means "call whatever origin served this page" - correct
+  // once this file is served BY the same FastAPI app it's talking to.
+  // For local file:// testing, set this to your local API instead, e.g.
+  // "http://127.0.0.1:8000"
+  // -------------------------------------------------------------------
+  const API_BASE = "";
+
+  const form = document.getElementById("loanForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const result = document.getElementById("result");
+  const verdict = document.getElementById("verdict");
+  const probNum = document.getElementById("probNum");
+  const resultBody = document.getElementById("resultBody");
+  const errorBanner = document.getElementById("errorBanner");
+  const ref = document.getElementById("ref");
+
+  ref.textContent = "REF " + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const applicant = {
+      age: parseInt(document.getElementById("age").value),
+      annual_income: parseFloat(document.getElementById("annual_income").value),
+      years_employed: parseFloat(document.getElementById("years_employed").value),
+      credit_score: parseInt(document.getElementById("credit_score").value),
+      loan_amount: parseFloat(document.getElementById("loan_amount").value),
+      loan_term_months: parseInt(document.getElementById("loan_term_months").value),
+      num_credit_cards: parseInt(document.getElementById("num_credit_cards").value),
+      debt_to_income: parseFloat(document.getElementById("debt_to_income").value),
+    };
+
+    result.classList.remove("show", "approve", "decline");
+    errorBanner.classList.remove("show");
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spin"></span>Assessing…';
+
+    try {
+      const response = await fetch(API_BASE + "/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(applicant),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        const msg = errData && errData.detail
+          ? JSON.stringify(errData.detail)
+          : "The API rejected this request (" + response.status + ").";
+        errorBanner.textContent = msg;
+        errorBanner.classList.add("show");
+        return;
+      }
+
+      const data = await response.json();
+      const pct = (data.default_probability * 100).toFixed(1);
+      const isApprove = data.decision === "APPROVE";
+
+      result.classList.add("show", isApprove ? "approve" : "decline");
+      verdict.textContent = isApprove ? "Approved" : "Declined";
+      probNum.textContent = pct + "%";
+      resultBody.innerHTML = isApprove
+        ? "The model estimates a <strong>low likelihood of default</strong> for this applicant, based on the details provided. This assessment is generated instantly and reflects statistical patterns in historical data only."
+        : "The model estimates a <strong>high likelihood of default</strong> for this applicant, based on the details provided. This assessment is generated instantly and reflects statistical patterns in historical data only.";
+
+    } catch (err) {
+      errorBanner.textContent = "Could not reach the assessment service. (" + err.message + ")";
+      errorBanner.classList.add("show");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Assess application";
+    }
+  });
 </script>
+
 </body>
 </html>

@@ -12,6 +12,7 @@ import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 # ---------------------------------------------------------------------------
 # 1. Load the trained model ONCE, when the service starts up.
@@ -130,7 +131,4 @@ def predict(applicant: Applicant):
 # ---------------------------------------------------------------------------
 @app.get("/")
 def root():
-    return {
-        "message": "Loan Default Prediction API",
-        "try": "POST to /predict, or open /docs for interactive testing",
-    }
+    return FileResponse("index.html")
